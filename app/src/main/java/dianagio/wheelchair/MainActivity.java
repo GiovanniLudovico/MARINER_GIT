@@ -61,7 +61,7 @@ public class MainActivity extends Activity
     */
 
 
-     // ciao belli
+     // ciao bellibelli belli
     //per disattivare yocto (debug gio)
     private boolean UseYocto= false;
 
