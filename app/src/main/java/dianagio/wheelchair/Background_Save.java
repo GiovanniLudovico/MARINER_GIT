@@ -1,26 +1,16 @@
 package dianagio.wheelchair;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.exception.DropboxException;
-
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by DianaM on 10/07/2015.
  */
 public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
-    static final short buffer_dim_inert=1000;
-    static final short buffer_dim_batt_motor=5;
+    // buffer dimension ( amount of samples to be saved each time)
+    static final short buffer_dim_inert =       1000;
+    static final short buffer_dim_batt_motor =  1;
 
     sample3axes acc_data =          new sample3axes(buffer_dim_inert);
     sample3axes gyro_data =         new sample3axes(buffer_dim_inert);
@@ -39,26 +29,28 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
     public static final short Gyro_ID       = 2;
     public static final short Battery_ID    = 3;
 
-    // costruttore
-    public  Background_Save(sampleMotor motor_in_data, sample3axes acc_in_data, sample3axes gyro_in_data, sampleBattery battery_in_data, String inFilePath) {
+    // constructor
+    public Background_Save(sampleMotor motor_in_data, sample3axes acc_in_data, sample3axes gyro_in_data, sampleBattery battery_in_data, String inFilePath) {
 
-        motor_data = motor_in_data;
-        acc_data = acc_in_data;
-        gyro_data = gyro_in_data;
-        battery_data = battery_in_data;
-        FilePath = inFilePath;
+        motor_data =    motor_in_data;
+        acc_data =      acc_in_data;
+        gyro_data =     gyro_in_data;
+        battery_data =  battery_in_data;
+        FilePath =      inFilePath;
     }
 
 
-    @Override //esegue nel thread principale prima dello start del thread in backgroung
+    @Override
     protected void onPreExecute() {
         super.onPreExecute();
     }
     @Override
+    //==========================================================================
     protected Boolean doInBackground(Void... params) {
+        //==========================================================================
         String StringToSave="";
 
-        // riempiamo la stringa
+        // fulfill string
         if (acc_data!=null) {
             for(int i=0; i<acc_data.Time.length; i++){
                 StringToSave += acc_data.Time[i] + "\t" + acc_data.X[i] + "\t" + acc_data.Y[i] + "\t" + acc_data.Z[i] + "\n";
@@ -80,10 +72,10 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
             }
         }
 
-        // salvataggio stringa in append nel file FilePath
+        // append string in FilePath
         FileOutputStream outputStream;
         try {
-            outputStream = new FileOutputStream(FilePath, true); //true: append al file
+            outputStream = new FileOutputStream(FilePath, true); //true: append to file
             outputStream.write(StringToSave.getBytes());
             outputStream.close();
         }
@@ -95,39 +87,10 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
      return false;
     }
 
-    @Override//metodo chiamato alla chiusura del thread invia tramite interfaccia un outpt a seconda del risultato
+    @Override
     protected void onPostExecute(Boolean result) {
 
         return;
     }
-
-
-/*
-    //solito showtoast
-    private void showToast(String msg) {
-        Toast error = Toast.makeText(mcontext, msg, Toast.LENGTH_LONG);
-        error.show();
-    }
-    public boolean isNetworkOnline() {
-        boolean status=false;
-        try{
-            ConnectivityManager cm = (ConnectivityManager) mcontext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = cm.getNetworkInfo(0);
-            if (netInfo != null && netInfo.getState()==NetworkInfo.State.CONNECTED) {
-                status= true;
-            }else {
-                netInfo = cm.getNetworkInfo(1);
-                if(netInfo!=null && netInfo.getState()== NetworkInfo.State.CONNECTED)
-                    status= true;
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-            return false;
-        }
-        return status;
-
-    }
-}
-*/
 
 }

@@ -5,7 +5,8 @@ android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizo
 android:paddingRight="@dimen/activity_horizontal_margin"
 android:paddingTop="@dimen/activity_vertical_margin"
 android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
-android:id="@+id/base_layer">
+android:id="@+id/base_layer"
+android:background="#9494f52d">
 
 
     <TableLayout
@@ -51,7 +52,7 @@ android:id="@+id/base_layer">
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="\nGyroscope"
+                android:text="Gyroscope"
                 android:id="@+id/textView2"
                 android:layout_column="0" />
 
@@ -78,9 +79,9 @@ android:id="@+id/base_layer">
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="MaxiIO data"
                 android:id="@+id/MaxiIO_view"
-                android:layout_column="0" />
+                android:layout_column="0"
+                android:hint="Maxi-IO: data" />
 
         </TableRow>
 
@@ -88,14 +89,6 @@ android:id="@+id/base_layer">
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Use Yocto"
-                android:id="@+id/use_yocto"
-                android:layout_column="0"
-                android:checked="false"
-                android:onClick="use_yocto_check" />
         </TableRow>
 
         <TableRow
@@ -106,9 +99,9 @@ android:id="@+id/base_layer">
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="MaxiIO events"
                 android:id="@+id/event_view"
-                android:layout_column="0" />
+                android:layout_column="0"
+                android:hint="Maxi-IO: events" />
         </TableRow>
 
         <TableRow
@@ -128,27 +121,12 @@ android:id="@+id/base_layer">
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/tsave_view"
-                android:layout_column="0"
-                android:hint="Saving Time"
-                android:singleLine="false" />
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/tsample_view"
-                android:layout_column="0"
-                android:hint="Sampling Time" />
         </TableRow>
     </TableLayout>
 

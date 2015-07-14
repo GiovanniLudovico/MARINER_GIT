@@ -20,18 +20,20 @@ import static android.os.Environment.getExternalStorageDirectory;
  * Created by Giovanni and Diana on 06/07/2015.
  */
 public class XML_handler {
+
+    //==========================================================================
     public User read() {
+        //==========================================================================
 
         String TagName;
         String Name_Xml = "";
         String Surname_Xml = "";
         String ApkVersion_Xml="";
 
-        User user;//instanzia un oggetto user;
-        //==========================================================================
+        User user;          // instantiates a user object
+
         if(isExternalStorageWritable()) {
             File folder = new File(getExternalStorageDirectory().getAbsolutePath() + "/Wheelchair");
-            //userFile = new File(Environment.getExternalStorageDirectory().toString() + "/"+name+"_WheelChair");
 
             if (!folder.exists()) {
                 folder.mkdir();
@@ -45,14 +47,14 @@ public class XML_handler {
                 File path = new File(pathToUserMetadataXML);
 
 
-                // cerca il file
+                // search for the file
                 try {
                     MyXml = new FileInputStream(path);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
 
-                // inizializza il parser e imposta MyXml come file da leggere
+                // initializes parser and sets MyXml as input file
                 XmlPullParser MyParser = Xml.newPullParser();
                 if (MyXml != null) {
                     try {
@@ -62,7 +64,7 @@ public class XML_handler {
                     }
 
                     try {
-                        MyParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false); //per leggere i nomi delle tag (non usa i namespaces)
+                        MyParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
                     } catch (XmlPullParserException e) {
                         e.printStackTrace();
                     }
@@ -74,14 +76,14 @@ public class XML_handler {
                         e.printStackTrace();
                     }
 
-                    while (eventType != XmlPullParser.END_DOCUMENT) {   //scorri documento
+                    while (eventType != XmlPullParser.END_DOCUMENT) {   //browse document
                         switch (eventType) {
                             case XmlPullParser.START_DOCUMENT:
                                 break;
 
-                            case XmlPullParser.START_TAG:                   // se vedi una start tag
+                            case XmlPullParser.START_TAG:                   // if there is a start tag
 
-                                TagName = MyParser.getName();        //vedi cosa ci e scritto
+                                TagName = MyParser.getName();               // read it
                                 if (TagName.equals("version")) {
                                     try {
                                         ApkVersion_Xml = MyParser.nextText();
@@ -121,7 +123,7 @@ public class XML_handler {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }   // fine while
+                    }   // end while
 
 
                 }
@@ -131,19 +133,14 @@ public class XML_handler {
                 return user;
             }
 
-        } // fine controllo myxml != null
-
-
-
-        // fine GetXml()
-
-
-
+        } // end control myxml != null
         return null;
     }
 
 
+    //==========================================================================
     public void write(User user) {
+        //==========================================================================
         String Name=user.tellName();
         String Surname=user.tellSurname();
         String apk_version=user.tellcurrentSWVersion();
@@ -151,9 +148,11 @@ public class XML_handler {
         FileOutputStream outputStream;
         String pathToUserMetadataXML = getExternalStorageDirectory().getAbsolutePath() + "/Wheelchair/load_config.xml";
 
+        // create file
         File MyXml = new File(pathToUserMetadataXML);
 
 
+        // write file with data
         XmlSerializer serializer = Xml.newSerializer();
         StringWriter writer = new StringWriter();
         try {
@@ -206,7 +205,3 @@ public class XML_handler {
     }
 
 }
-
-
-
-
