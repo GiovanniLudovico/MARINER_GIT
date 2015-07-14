@@ -60,6 +60,8 @@ public class MainActivity extends Activity
     String Battery_data;
     */
 
+
+     // ciao belli
     //per disattivare yocto (debug gio)
     private boolean UseYocto= false;
 
