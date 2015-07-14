@@ -63,7 +63,7 @@ public class Init_Activity extends Activity {
     private UploadData upload;                               // class used to implement the data upload
     //============================================================
 
-    public List<String> NotSentFilesName = new ArrayList<>(); //memoria di file non inviati
+    public List<String> NotSentFilesName = new ArrayList<>(); //not sent files memory
 
      LastFiles lastfiles;                                     //handle of the last files to upload
 
