@@ -19,4 +19,5 @@ public class LastFiles implements Serializable {
     public String tell_motor()              { return motor;    }
     public String tell_accelerometer()      { return accelerometer;    }
     public String tell_gyroscope()          { return gyroscope;    }
+    public String tell_battery()            { return battery;}
 }

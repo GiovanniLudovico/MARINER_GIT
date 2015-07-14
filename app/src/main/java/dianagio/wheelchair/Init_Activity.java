@@ -220,6 +220,30 @@ public class Init_Activity extends Activity {
         upload.execute();
 
 
+        s1 = lastfiles.tell_battery();
+        s2 = user_child.tellAcquisitionsFolder();
+
+
+        final String filenameBattery="/" + formatter.format(now).toString() +"/" +(s1.substring(s2.length(),s1.length()));
+        upload = new UploadData(new AsyncResponse() {
+
+            @Override
+            public void processFinish(String output) {
+                if (output!=null)//se e' diverso da null
+                {
+                    showToast("transfer failed");
+                    //Adding item to List
+                    NotSentFilesName.add(NotSentFilesName.size(), output);               //this will add string at the next index
+                    NotSentFilesName.add(NotSentFilesName.size(), filenameBattery);
+
+                }
+                else showToast("tutto ok");
+            }
+        });
+        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_gyroscope(), user_child.tellUserFolder(), user_child.Acquisitions +filenameBattery);
+        upload.execute();
+
+
 
 
         UploadNotSentFiles(NotSentFilesName);//caricati gli ultimi file carica dei file che non sono stati caricati

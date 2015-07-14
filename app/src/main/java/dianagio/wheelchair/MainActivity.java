@@ -253,6 +253,7 @@ public class MainActivity extends Activity
         IsYoctoConnected();
         Acc_OnResume();
         Gyro_OnResume();
+        registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if(UseYocto==true) {
             Start_Yocto();
         }
@@ -270,9 +271,10 @@ public class MainActivity extends Activity
     //==========================================================================
 
         // DEBUG
-        tsample = System.currentTimeMillis() - tsample;
+       /* tsample = System.currentTimeMillis() - tsample;
         tsample_view = (TextView) findViewById(R.id.tsample_view);
         tsample_view.setText("Tsample= " + tsample + " ms");
+        */
 
         // STOP ACQUISITIONS
         if(UseYocto==true) {
@@ -280,9 +282,29 @@ public class MainActivity extends Activity
         Acc_OnPause();
         Gyro_OnPause();
 
+        // unregister battery change events generation
+        unregisterReceiver(mBatChanged);
+
         call_toast("Wheelchair OFF");
 
        // myAzure_TransferData();
+
+        // FLUSH DATA
+        Background_Save bg_save1=new Background_Save(null, Acc_data, null, null , Acc_Path);
+        bg_save1.execute();
+        Acc_data_array_index = 0;
+
+        Background_Save bg_save2=new Background_Save(null, null, Gyro_data, null , Gyro_Path);
+        bg_save2.execute();
+        Gyro_data_array_index = 0;
+
+        Background_Save bg_save3=new Background_Save(Motor_data, null, null, null , Motor_Path);
+        bg_save3.execute();
+        Motor_data_array_index = 0;
+
+        Background_Save bg_save4=new Background_Save(null, null, null , Battery_data, Battery_Path);
+        bg_save4.execute();
+        Battery_data_array_index = 0;
 
         // SWITCH OFF ACTIVITY AND SET RESULT TO INIT ACTIVITY
         Intent intent= new Intent();
