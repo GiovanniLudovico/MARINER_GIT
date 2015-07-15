@@ -379,7 +379,7 @@ public class MainActivity extends Activity
                     Gyro_data_array_index++;
 
                     if(Gyro_data_array_index == Gyro_data.Time.length){
-                        Background_Save bg_save = new Background_Save(null, Gyro_data, null, null , Gyro_Path);
+                        Background_Save bg_save = new Background_Save(null, null, Gyro_data, null , Gyro_Path);
                         bg_save.execute();
                         Gyro_data_array_index = 0;
                     }
@@ -588,7 +588,6 @@ public class MainActivity extends Activity
     //  YOCTOPUCE: EVENTS HANDLING
     //==============================================================================================
     //==============================================================================================
-
     private Handler handler = new Handler();
     private int _outputdata;
     final Runnable r = new Runnable()
@@ -604,6 +603,9 @@ public class MainActivity extends Activity
                     io.set_portDirection(0x0F);             //bit 0-3: OUT; bit 4-7: IN ( bit set to 0)
                     io.set_portPolarity(0);                 // polarity set to regular
                     io.set_portOpenDrain(0);                // No open drain
+
+                    _outputdata = (_outputdata + 1) % 16;   // cycle ouput 0..15
+                    io.set_portState(_outputdata);          // set output value
 
                     // read motor value
                     //int inputdata = io.get_bitState(7);      // read bit value
