@@ -447,6 +447,7 @@ public class MainActivity extends Activity
         mFileName += "/Motor_"+ formatter.format(now).toString()+ ".txt";
         lastfiles.set_motor(mFileName);
         Motor_Path = mFileName;
+        SillyString = "Time\tStatus\n";
 
         try {
             outputStream = new FileOutputStream(mFileName, true);
@@ -462,6 +463,7 @@ public class MainActivity extends Activity
         mFileName += "/Acc_"+ formatter.format(now).toString()+ ".txt";
         lastfiles.set_acc(mFileName);
         Acc_Path = mFileName;
+        SillyString = "Time\tX\tY\tZ\n";
 
         try {
             outputStream = new FileOutputStream(mFileName, true);
@@ -476,6 +478,7 @@ public class MainActivity extends Activity
         mFileName += "/Gyro_"+ formatter.format(now).toString()+ ".txt";
         lastfiles.set_gyro(mFileName);
         Gyro_Path = mFileName;
+        SillyString = "Time\tX\tY\tZ\n";
 
         try {
             outputStream = new FileOutputStream(mFileName, true);
@@ -491,6 +494,7 @@ public class MainActivity extends Activity
         mFileName += "/Battery_"+ formatter.format(now).toString()+ ".txt";
         lastfiles.set_battery(mFileName);
         Battery_Path = mFileName;
+        SillyString = "Time\tBattLev\n";
 
         try {
             outputStream = new FileOutputStream(mFileName, true);
