@@ -82,6 +82,16 @@ public class MainActivity extends Activity
     sample3axes Gyro_data =         new sample3axes(buffer_dim_inert);
     sampleMotor Motor_data =        new sampleMotor(buffer_dim_batt_motor);
     sampleBattery Battery_data =    new sampleBattery(buffer_dim_batt_motor);
+
+    sample3axes Acc_data1 =          new sample3axes(buffer_dim_inert);
+    sample3axes Gyro_data1 =         new sample3axes(buffer_dim_inert);
+    sampleMotor Motor_data1 =        new sampleMotor(buffer_dim_batt_motor);
+    sampleBattery Battery_data1 =    new sampleBattery(buffer_dim_batt_motor);
+
+    short ToggleAccDataStruct = 0;
+    short ToggleGyroDataStruct = 0;
+
+
     // indexes needed to browse arrays
     int Acc_data_array_index = 0;
     int Gyro_data_array_index = 0;
@@ -321,12 +331,10 @@ public class MainActivity extends Activity
         call_toast("Motor ON");
 
         //AppendNewData(Motor_ID, null, 1);
-        if(UseYocto==true) {
+        if (UseYocto == true) {
             Init_Yocto(MaxiIO);
-        }
-        else
+        } else
             call_toast("you are not using Yoctopuce");
-
 
     }
 
@@ -340,52 +348,93 @@ public class MainActivity extends Activity
         //AppendNewData(Motor_ID, null, 0);
     }
 
+
+    // DA TOGLIERE, SOLO PER DEBUG DEL SALVATAGGIO DEI DATI
+    int ramp_acc=0;
+    int ramp_gyro=0;
+
     @Override
     //==========================================================================
     public void onSensorChanged(SensorEvent event) {
         //==========================================================================
 
+        long tmpL = System.currentTimeMillis();
         // APPEND INERTIAL SENSORS DATA AND SAVE THEM TO FILES
         switch(event.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
                 if(Acc_data_array_index < Acc_data.Time.length) {
 
-                    Acc_data.Time[Acc_data_array_index] = System.currentTimeMillis();
-                    Acc_data.X[Acc_data_array_index] = event.values[0];
-                    Acc_data.Y[Acc_data_array_index] = event.values[1];
-                    Acc_data.Z[Acc_data_array_index] = event.values[2];
+                    if (ToggleAccDataStruct == 0) { // save in the first structure
+                        //Acc_data.Time[Acc_data_array_index] = System.currentTimeMillis();
+                        Acc_data.Time[Acc_data_array_index] = tmpL;
+                        //Acc_data.X[Acc_data_array_index] = event.values[0];
+                        //Acc_data.Y[Acc_data_array_index] = event.values[1];
+                        //Acc_data.Z[Acc_data_array_index] = event.values[2];
+                        Acc_data.X[Acc_data_array_index] = ramp_acc;
+                        Acc_data.Y[Acc_data_array_index] = ramp_acc;
+                        Acc_data.Z[Acc_data_array_index] = ramp_acc;
 
-                    Acc_data_array_index++;
+                    } else if (ToggleAccDataStruct == 1) {  //save in the second structure
+                        Acc_data1.Time[Acc_data_array_index] = tmpL;
+                        Acc_data1.X[Acc_data_array_index] = ramp_acc;
+                        Acc_data1.Y[Acc_data_array_index] = ramp_acc;
+                        Acc_data1.Z[Acc_data_array_index] = ramp_acc;
 
-                    if(Acc_data_array_index == Acc_data.Time.length){
-                        Background_Save bg_save=new Background_Save(null, Acc_data, null, null , Acc_Path);
-                        bg_save.execute();
-                        Acc_data_array_index = 0;
                     }
-                }
-                else {
+                    ramp_acc++;
+                    Acc_data_array_index++;
+                } else {
                     // MANAGES FULL ARRAY
+                }
+
+                if(Acc_data_array_index == Acc_data.Time.length){
+                    Acc_data_array_index = 0;
+
+                    if(ToggleAccDataStruct==0){
+                        Background_Save bg_AccSave = new Background_Save(null, Acc_data, null, null , Acc_Path);
+                        bg_AccSave.execute();
+                        ToggleAccDataStruct = 1;
+                    }else if(ToggleAccDataStruct==1){
+                        Background_Save bg_AccSave = new Background_Save(null, Acc_data1, null, null , Acc_Path);
+                        bg_AccSave.execute();
+                        ToggleAccDataStruct = 0;
+                    }
                 }
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
                 if(Gyro_data_array_index < Gyro_data.Time.length) {
 
-                    Gyro_data.Time[Acc_data_array_index] = System.currentTimeMillis();
-                    Gyro_data.X[Acc_data_array_index] = event.values[0];
-                    Gyro_data.Y[Acc_data_array_index] = event.values[1];
-                    Gyro_data.Z[Acc_data_array_index] = event.values[2];
-
-                    Gyro_data_array_index++;
-
-                    if(Gyro_data_array_index == Gyro_data.Time.length){
-                        Background_Save bg_save = new Background_Save(null, null, Gyro_data, null , Gyro_Path);
-                        bg_save.execute();
-                        Gyro_data_array_index = 0;
+                    if (ToggleGyroDataStruct == 0) {
+                        Gyro_data.Time[Gyro_data_array_index] = tmpL;
+                        Gyro_data.X[Gyro_data_array_index] = ramp_gyro;
+                        Gyro_data.Y[Gyro_data_array_index] = ramp_gyro;
+                        Gyro_data.Z[Gyro_data_array_index] = ramp_gyro;
+                    } else if (ToggleGyroDataStruct == 1) {
+                        Gyro_data1.Time[Gyro_data_array_index] = tmpL;
+                        Gyro_data1.X[Gyro_data_array_index] = ramp_gyro;
+                        Gyro_data1.Y[Gyro_data_array_index] = ramp_gyro;
+                        Gyro_data1.Z[Gyro_data_array_index] = ramp_gyro;
                     }
+                    ramp_gyro++;
+                    Gyro_data_array_index++;
                 }
                 else {
                     // MANAGES FULL ARRAY
+                }
+
+                if (Gyro_data_array_index == Gyro_data.Time.length) {
+                    Gyro_data_array_index = 0;
+
+                    if (ToggleGyroDataStruct == 0) {
+                        Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data, null, Gyro_Path);
+                        bg_GyroSave.execute();
+                        ToggleGyroDataStruct = 1;
+                    } else if (ToggleGyroDataStruct == 1) {
+                        Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);
+                        bg_GyroSave.execute();
+                        ToggleGyroDataStruct = 0;
+                    }
                 }
                 break;
         }
