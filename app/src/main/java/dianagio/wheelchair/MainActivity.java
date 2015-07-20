@@ -12,6 +12,7 @@ import android.hardware.SensorManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -83,6 +84,7 @@ public class MainActivity extends Activity
     sampleMotor Motor_data =        new sampleMotor(buffer_dim_batt_motor);
     sampleBattery Battery_data =    new sampleBattery(buffer_dim_batt_motor);
 
+    //per debug del salvataggio in memoria
     sample3axes Acc_data1 =          new sample3axes(buffer_dim_inert);
     sample3axes Gyro_data1 =         new sample3axes(buffer_dim_inert);
     sampleMotor Motor_data1 =        new sampleMotor(buffer_dim_batt_motor);
@@ -111,6 +113,8 @@ public class MainActivity extends Activity
 
 
 
+    // acquisition starting time
+    static long Start_Time;
 
     // DEBUG THINGS
     TextView tsave_view;
@@ -231,7 +235,9 @@ public class MainActivity extends Activity
 
             // APPEND NEW DATA TO BATTERY DATA STRUCTURE
             if(Battery_data_array_index < Battery_data.Time.length) {
-                Battery_data.Time[Battery_data_array_index] = System.currentTimeMillis();
+                //Battery_data.Time[Battery_data_array_index] = System.currentTimeMillis();
+                //Battery_data.Time[Battery_data_array_index] = System.nanoTime() - Start_Time;
+                Battery_data.Time[Battery_data_array_index] = SystemClock.elapsedRealtime() - Start_Time;
                 Battery_data.BatLev[Battery_data_array_index] = level;
 
                 Battery_data_array_index++;
@@ -358,7 +364,10 @@ public class MainActivity extends Activity
     public void onSensorChanged(SensorEvent event) {
         //==========================================================================
 
-        long tmpL = System.currentTimeMillis();
+        //long tmpL = System.currentTimeMillis();
+        //long tmpL = System.nanoTime() - Start_Time;
+        long tmpL = SystemClock.elapsedRealtime() - Start_Time;
+
         // APPEND INERTIAL SENSORS DATA AND SAVE THEM TO FILES
         switch(event.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
@@ -379,27 +388,31 @@ public class MainActivity extends Activity
                         Acc_data1.X[Acc_data_array_index] = ramp_acc;
                         Acc_data1.Y[Acc_data_array_index] = ramp_acc;
                         Acc_data1.Z[Acc_data_array_index] = ramp_acc;
-
                     }
                     ramp_acc++;
                     Acc_data_array_index++;
+
+                    if(Acc_data_array_index == Acc_data.Time.length){
+                        Acc_data_array_index = 0;
+
+                        if(ToggleAccDataStruct==0){
+                            Background_Save bg_AccSave = new Background_Save(null, Acc_data, null, null , Acc_Path);    // save the full struct
+                            bg_AccSave.execute();
+                            ToggleAccDataStruct = 1;
+                            Acc_data = new sample3axes(buffer_dim_inert);
+
+                        }else if(ToggleAccDataStruct==1){
+                            Background_Save bg_AccSave = new Background_Save(null, Acc_data1, null, null , Acc_Path);    // save the full struct
+                            bg_AccSave.execute();
+                            ToggleAccDataStruct = 0;
+                            Acc_data1 = new sample3axes(buffer_dim_inert);
+                        }
+                    }
                 } else {
                     // MANAGES FULL ARRAY
                 }
 
-                if(Acc_data_array_index == Acc_data.Time.length){
-                    Acc_data_array_index = 0;
 
-                    if(ToggleAccDataStruct==0){
-                        Background_Save bg_AccSave = new Background_Save(null, Acc_data, null, null , Acc_Path);
-                        bg_AccSave.execute();
-                        ToggleAccDataStruct = 1;
-                    }else if(ToggleAccDataStruct==1){
-                        Background_Save bg_AccSave = new Background_Save(null, Acc_data1, null, null , Acc_Path);
-                        bg_AccSave.execute();
-                        ToggleAccDataStruct = 0;
-                    }
-                }
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
@@ -418,24 +431,29 @@ public class MainActivity extends Activity
                     }
                     ramp_gyro++;
                     Gyro_data_array_index++;
+
+                    if (Gyro_data_array_index == Gyro_data.Time.length) {
+                        Gyro_data_array_index = 0;
+
+                        if (ToggleGyroDataStruct == 0) {
+                            //Gyro_data1 = new sample3axes(buffer_dim_inert);   // re-initialise struct in which data will be saved from now
+                            Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data, null, Gyro_Path);    // save the full struct
+                            bg_GyroSave.execute();
+                            ToggleGyroDataStruct = 1;
+                        } else if (ToggleGyroDataStruct == 1) {
+                            //Gyro_data = new sample3axes(buffer_dim_inert);   // re-initialise struct in which data will be saved from now
+                            Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);    // save the full struct
+                            bg_GyroSave.execute();
+                            ToggleGyroDataStruct = 0;
+                        }
+                    }
+
                 }
                 else {
                     // MANAGES FULL ARRAY
                 }
 
-                if (Gyro_data_array_index == Gyro_data.Time.length) {
-                    Gyro_data_array_index = 0;
 
-                    if (ToggleGyroDataStruct == 0) {
-                        Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data, null, Gyro_Path);
-                        bg_GyroSave.execute();
-                        ToggleGyroDataStruct = 1;
-                    } else if (ToggleGyroDataStruct == 1) {
-                        Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);
-                        bg_GyroSave.execute();
-                        ToggleGyroDataStruct = 0;
-                    }
-                }
                 break;
         }
 
@@ -490,6 +508,10 @@ public class MainActivity extends Activity
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         Date now = new Date();
+
+        //Start_Time = System.nanoTime();
+        Start_Time = SystemClock.elapsedRealtime();
+
         mFileName = user.tellAcquisitionsFolder();
 
         // MOTOR
@@ -687,7 +709,8 @@ public class MainActivity extends Activity
             if (NewInputData != OldInputData) {         // something occurred
 
                 sampleMotor tmp = new sampleMotor(1);
-                tmp.Time[0] = System.currentTimeMillis();
+                //tmp.Time[0] = System.currentTimeMillis();
+                tmp.Time[0] = SystemClock.elapsedRealtime() - Start_Time;
 
                 if (NewInputData == 1 && OldInputData == 0) {           // occurred motor event: now it is ON
                     tmp.Status[0] = Motor_ON_ID;
