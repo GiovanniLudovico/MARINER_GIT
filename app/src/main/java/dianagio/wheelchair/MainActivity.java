@@ -49,7 +49,7 @@ public class MainActivity extends Activity
     TextView battery_view;
 
     // INDICATE WHEN YOCTO IS IN USE (AVAILABLE)
-    private boolean UseYocto= false;
+    private boolean UseYocto = false;
 
     // AZURE
     /*private MobileServiceClient mClient;
@@ -63,32 +63,32 @@ public class MainActivity extends Activity
 
     // constants useful when movement detection is needed
     private static final float SHAKE_THRESHOLD = SensorManager.GRAVITY_EARTH + 2;
-    private static final float STILL_THRESHOLD = SensorManager.GRAVITY_EARTH + 1/10;
+    private static final float STILL_THRESHOLD = SensorManager.GRAVITY_EARTH + 1 / 10;
 
 
     // SOURCES:
-    public static final short Motor_ID      = 0;
-    public static final short Acc_ID        = 1;
-    public static final short Gyro_ID       = 2;
-    public static final short Battery_ID    = 3;
+    public static final short Motor_ID = 0;
+    public static final short Acc_ID = 1;
+    public static final short Gyro_ID = 2;
+    public static final short Battery_ID = 3;
 
     // MOTOR STATES:
     public static final short Motor_OFF_ID = 0;
     public static final short Motor_ON_ID = 1;
 
     // DATA STRUCTURES AND DIMENSIONS
-    static final short buffer_dim_inert =           1000;
-    static final short buffer_dim_batt_motor =      5;
-    sample3axes Acc_data =          new sample3axes(buffer_dim_inert);
-    sample3axes Gyro_data =         new sample3axes(buffer_dim_inert);
-    sampleMotor Motor_data =        new sampleMotor(buffer_dim_batt_motor);
-    sampleBattery Battery_data =    new sampleBattery(buffer_dim_batt_motor);
+    static final short buffer_dim_inert = 1000;
+    static final short buffer_dim_batt_motor = 5;
+    sample3axes Acc_data = new sample3axes(buffer_dim_inert);
+    sample3axes Gyro_data = new sample3axes(buffer_dim_inert);
+    sampleMotor Motor_data = new sampleMotor(buffer_dim_batt_motor);
+    sampleBattery Battery_data = new sampleBattery(buffer_dim_batt_motor);
 
     //per debug del salvataggio in memoria
-    sample3axes Acc_data1 =          new sample3axes(buffer_dim_inert);
-    sample3axes Gyro_data1 =         new sample3axes(buffer_dim_inert);
-    sampleMotor Motor_data1 =        new sampleMotor(buffer_dim_batt_motor);
-    sampleBattery Battery_data1 =    new sampleBattery(buffer_dim_batt_motor);
+    sample3axes Acc_data1 = new sample3axes(buffer_dim_inert);
+    sample3axes Gyro_data1 = new sample3axes(buffer_dim_inert);
+    sampleMotor Motor_data1 = new sampleMotor(buffer_dim_batt_motor);
+    sampleBattery Battery_data1 = new sampleBattery(buffer_dim_batt_motor);
 
     short ToggleAccDataStruct = 0;
     short ToggleGyroDataStruct = 0;
@@ -101,16 +101,15 @@ public class MainActivity extends Activity
     int Battery_data_array_index = 0;
 
     // PATHS OF STORED FILES
-    String Acc_Path="";
-    String Gyro_Path="";
-    String Motor_Path="";
-    String Battery_Path="";
+    String Acc_Path = "";
+    String Gyro_Path = "";
+    String Motor_Path = "";
+    String Battery_Path = "";
     static String mFileName = null;
 
     // CLASSES FOR COMMUNICATIONS BETWEEN ACTIVITIES
     User user;//input
     LastFiles lastfiles;//output
-
 
 
     // acquisition starting time
@@ -123,7 +122,6 @@ public class MainActivity extends Activity
     long tsave = 0;
 
 
-
     @Override
     //==========================================================================
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,21 +131,21 @@ public class MainActivity extends Activity
 
         Intent intent = getIntent();
         user = (User) intent.getSerializableExtra("user");      // GET INPUT FROM INIT ACTIVITY
-        lastfiles=new LastFiles();                              // SET OUTPUT TO INIT ACTIVITY
+        lastfiles = new LastFiles();                              // SET OUTPUT TO INIT ACTIVITY
 
         // INITIALISE SENSOR MANAGER
-        mSensorManager =        (SensorManager) getSystemService(SENSOR_SERVICE);
-        mAcc =                  mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mGyro =                 mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
         // START WITH ACQUISITIONS
         WheelChair_ON(null);
 
         // REGISTER BROADCAST RECEIVER FOR BATTERY EVENTS
         registerReceiver(mBatChargeOff, new IntentFilter(Intent.ACTION_POWER_DISCONNECTED));
-        registerReceiver(mBatLow,       new IntentFilter(Intent.ACTION_BATTERY_LOW));
-        registerReceiver(mBatOkay,      new IntentFilter(Intent.ACTION_BATTERY_OKAY));
-        registerReceiver(mBatChanged,   new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        registerReceiver(mBatLow, new IntentFilter(Intent.ACTION_BATTERY_LOW));
+        registerReceiver(mBatOkay, new IntentFilter(Intent.ACTION_BATTERY_OKAY));
+        registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         lastfiles.isyoctoinuse = UseYocto;
     }
@@ -179,15 +177,19 @@ public class MainActivity extends Activity
 
 
     @Override
-    protected void onRestart(){
+    protected void onRestart() {
         super.onRestart();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
     }
+
     @Override
-    protected void onResume() { super.onResume();   }
+    protected void onResume() {
+        super.onResume();
+    }
 
 
     //==============================================================================================
@@ -224,7 +226,7 @@ public class MainActivity extends Activity
         }
     };
     //==========================================================================
-    private BroadcastReceiver mBatChanged = new BroadcastReceiver(){
+    private BroadcastReceiver mBatChanged = new BroadcastReceiver() {
         @Override
         public void onReceive(Context cont, Intent battery_intent) {
             TextView view = (TextView) findViewById(R.id.battery_view);
@@ -234,7 +236,7 @@ public class MainActivity extends Activity
             view.setText("Battery: " + level + "%");
 
             // APPEND NEW DATA TO BATTERY DATA STRUCTURE
-            if(Battery_data_array_index < Battery_data.Time.length) {
+            if (Battery_data_array_index < Battery_data.Time.length) {
                 //Battery_data.Time[Battery_data_array_index] = System.currentTimeMillis();
                 //Battery_data.Time[Battery_data_array_index] = System.nanoTime() - Start_Time;
                 Battery_data.Time[Battery_data_array_index] = SystemClock.elapsedRealtime() - Start_Time;
@@ -244,7 +246,7 @@ public class MainActivity extends Activity
             }
 
             // IF THE ARRAY IS FULL THEN SAVE DATA ON FILE
-            if(Battery_data_array_index == Battery_data.Time.length){
+            if (Battery_data_array_index == Battery_data.Time.length) {
                 Background_Save bg_save = new Background_Save(null, null, null, Battery_data, Battery_Path);
                 bg_save.execute();
                 Battery_data_array_index = 0;
@@ -261,7 +263,7 @@ public class MainActivity extends Activity
 
     //==========================================================================
     public void WheelChair_ON(View view) {
-    //==========================================================================
+        //==========================================================================
         // CREATE LOCAL FILES
         CreateMyFile();
 
@@ -270,11 +272,10 @@ public class MainActivity extends Activity
         Acc_OnResume();
         Gyro_OnResume();
         registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        if(UseYocto==true) {
+        if (UseYocto == true) {
             Start_Yocto();
-        }
-        else
-        call_toast("you are not using Yoctopuce");
+        } else
+            call_toast("you are not using Yoctopuce");
 
         call_toast("Wheelchair ON");
 
@@ -284,7 +285,7 @@ public class MainActivity extends Activity
 
     //==========================================================================
     public void WheelChair_OFF(View view) {
-    //==========================================================================
+        //==========================================================================
 
         // DEBUG
        /* tsample = System.currentTimeMillis() - tsample;
@@ -293,8 +294,9 @@ public class MainActivity extends Activity
         */
 
         // STOP ACQUISITIONS
-        if(UseYocto==true) {
-            Stop_Yocto();}
+        if (UseYocto == true) {
+            Stop_Yocto();
+        }
         Acc_OnPause();
         Gyro_OnPause();
 
@@ -303,22 +305,32 @@ public class MainActivity extends Activity
 
         call_toast("Wheelchair OFF");
 
-       // myAzure_TransferData();
+        // myAzure_TransferData();
 
         // FLUSH DATA
-        Background_Save bg_save1=new Background_Save(null, Acc_data, null, null , Acc_Path);
-        bg_save1.execute();
+        if (ToggleAccDataStruct == 0) {
+            Background_Save bg_save1 = new Background_Save(null, Acc_data, null, null, Acc_Path);
+            bg_save1.execute();
+        } else if(ToggleAccDataStruct == 1){
+            Background_Save bg_save1 = new Background_Save(null, Acc_data1, null, null, Acc_Path);
+            bg_save1.execute();
+        }
         Acc_data_array_index = 0;
 
-        Background_Save bg_save2=new Background_Save(null, null, Gyro_data, null , Gyro_Path);
-        bg_save2.execute();
+        if(ToggleGyroDataStruct == 0) {
+            Background_Save bg_save2 = new Background_Save(null, null, Gyro_data, null, Gyro_Path);
+            bg_save2.execute();
+        }else if (ToggleGyroDataStruct == 1){
+            Background_Save bg_save2 = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);
+            bg_save2.execute();
+        }
         Gyro_data_array_index = 0;
 
-        Background_Save bg_save3=new Background_Save(Motor_data, null, null, null , Motor_Path);
+        Background_Save bg_save3 = new Background_Save(Motor_data, null, null, null , Motor_Path);
         bg_save3.execute();
         Motor_data_array_index = 0;
 
-        Background_Save bg_save4=new Background_Save(null, null, null , Battery_data, Battery_Path);
+        Background_Save bg_save4 = new Background_Save(null, null, null , Battery_data, Battery_Path);
         bg_save4.execute();
         Battery_data_array_index = 0;
 
@@ -440,11 +452,13 @@ public class MainActivity extends Activity
                             Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data, null, Gyro_Path);    // save the full struct
                             bg_GyroSave.execute();
                             ToggleGyroDataStruct = 1;
+                            Gyro_data = new sample3axes(buffer_dim_inert);
                         } else if (ToggleGyroDataStruct == 1) {
                             //Gyro_data = new sample3axes(buffer_dim_inert);   // re-initialise struct in which data will be saved from now
                             Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);    // save the full struct
                             bg_GyroSave.execute();
                             ToggleGyroDataStruct = 0;
+                            Gyro_data1 = new sample3axes(buffer_dim_inert);
                         }
                     }
 
