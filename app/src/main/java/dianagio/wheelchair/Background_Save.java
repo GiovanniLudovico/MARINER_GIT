@@ -63,40 +63,40 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
                 for(int i=0; i<acc_data.Time.length; i++){
                     StringToSave += acc_data.Time[i] + "\t" + acc_data.X[i] + "\t" + acc_data.Y[i] + "\t" + acc_data.Z[i] + "\n";
 
-                    BinaryOutputStream.write( (int)(acc_data.Time[i] & 0xffffffff) );
-                    BinaryOutputStream.write( (int)((acc_data.Time[i]>>32) & 0xffffffff) );
-                    BinaryOutputStream.write( (int)acc_data.X[i]);
-                    BinaryOutputStream.write( (int)acc_data.Y[i]);
-                    BinaryOutputStream.write( (int)acc_data.Z[i]);
+                    BinaryOutputStream.write( (int)((acc_data.Time[i]>>32) & 0xffffffff) );     //MSB
+                    BinaryOutputStream.write( (int)(acc_data.Time[i] & 0xffffffff) );           //LSB
+                    BinaryOutputStream.write( (int) acc_data.X[i]);
+                    BinaryOutputStream.write( (int) acc_data.Y[i]);
+                    BinaryOutputStream.write( (int) acc_data.Z[i]);
                 }
 
             }else if(gyro_data!=null){
                 for(int i=0; i<gyro_data.Time.length; i++){
                     StringToSave += gyro_data.Time[i] + "\t" + gyro_data.X[i] + "\t" + gyro_data.Y[i] + "\t" + gyro_data.Z[i] + "\n";
 
-                    BinaryOutputStream.write( (int)(gyro_data.Time[i] & 0xffffffff) );
                     BinaryOutputStream.write( (int)((gyro_data.Time[i]>>32) & 0xffffffff) );
-                    BinaryOutputStream.write( (int)gyro_data.X[i]);
-                    BinaryOutputStream.write( (int)gyro_data.Y[i]);
-                    BinaryOutputStream.write( (int)gyro_data.Z[i]);
+                    BinaryOutputStream.write( (int)(gyro_data.Time[i] & 0xffffffff) );
+                    BinaryOutputStream.write( (int) gyro_data.X[i]);
+                    BinaryOutputStream.write( (int) gyro_data.Y[i]);
+                    BinaryOutputStream.write( (int) gyro_data.Z[i]);
                 }
 
             }else if(motor_data!=null){
                 for(int i=0; i<motor_data.Time.length; i++){
                     StringToSave += motor_data.Time[i] + "\t" + motor_data.Status[i] + "\n";
 
-                    BinaryOutputStream.write( (int)(motor_data.Time[i] & 0xffffffff) );
                     BinaryOutputStream.write( (int)((motor_data.Time[i]>>32) & 0xffffffff) );
-                    BinaryOutputStream.write( (int)motor_data.Status[i]);
+                    BinaryOutputStream.write( (int)(motor_data.Time[i] & 0xffffffff) );
+                    BinaryOutputStream.write( (int) motor_data.Status[i]);
                 }
 
             }else if(battery_data!=null){
                 for(int i=0; i<battery_data.Time.length; i++){
                     StringToSave += battery_data.Time[i] + "\t" + battery_data.BatLev[i] + "\n";
 
-                    BinaryOutputStream.write( (int)(battery_data.Time[i] & 0xffffffff) );
                     BinaryOutputStream.write( (int)((battery_data.Time[i]>>32) & 0xffffffff) );
-                    BinaryOutputStream.write( (int)battery_data.BatLev[i]);
+                    BinaryOutputStream.write( (int)(battery_data.Time[i] & 0xffffffff) );
+                    BinaryOutputStream.write( (int) battery_data.BatLev[i]);
                 }
             }
             BinaryOutputStream.close(); //close binary file
