@@ -280,7 +280,7 @@ public class MainActivity extends Activity
         call_toast("Wheelchair ON");
 
         // DEBUG
-        tsample = System.currentTimeMillis();
+        //tsample = System.currentTimeMillis();
     }
 
     //==========================================================================
