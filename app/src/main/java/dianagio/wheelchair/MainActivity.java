@@ -30,10 +30,6 @@ import java.util.Date;
 
 import static com.yoctopuce.YoctoAPI.YDigitalIO.FindDigitalIO;
 
-// MICROSOFT AZURE LIBRARIES
-// YOCTOPUCE LIBRARIES
-// LIBRARIES FOR SAVING DATA ON FILE
-
 
 //==========================================================================
 public class MainActivity extends Activity
@@ -83,6 +79,7 @@ public class MainActivity extends Activity
     sample3axes Gyro_data = new sample3axes(buffer_dim_inert);
     sampleMotor Motor_data = new sampleMotor(buffer_dim_batt_motor);
     sampleBattery Battery_data = new sampleBattery(buffer_dim_batt_motor);
+    sampleMotor Wheelchair_data = new sampleMotor(buffer_dim_batt_motor);
 
     //per debug del salvataggio in memoria
     sample3axes Acc_data1 = new sample3axes(buffer_dim_inert);
@@ -99,12 +96,14 @@ public class MainActivity extends Activity
     int Gyro_data_array_index = 0;
     int Motor_data_array_index = 0;
     int Battery_data_array_index = 0;
+    int Wheelchair_data_array_index = 0;
 
     // PATHS OF STORED FILES
     String Acc_Path = "";
     String Gyro_Path = "";
     String Motor_Path = "";
     String Battery_Path = "";
+    String Wheelchair_Path = "";
     static String mFileName = null;
 
     // CLASSES FOR COMMUNICATIONS BETWEEN ACTIVITIES
@@ -247,7 +246,7 @@ public class MainActivity extends Activity
 
             // IF THE ARRAY IS FULL THEN SAVE DATA ON FILE
             if (Battery_data_array_index == Battery_data.Time.length) {
-                Background_Save bg_save = new Background_Save(null, null, null, Battery_data, Battery_Path);
+                Background_Save bg_save = new Background_Save(null, null, null, Battery_data, null, Battery_Path);
                 bg_save.execute();
                 Battery_data_array_index = 0;
             }
@@ -309,28 +308,28 @@ public class MainActivity extends Activity
 
         // FLUSH DATA
         if (ToggleAccDataStruct == 0) {
-            Background_Save bg_save1 = new Background_Save(null, Acc_data, null, null, Acc_Path);
+            Background_Save bg_save1 = new Background_Save(null, Acc_data, null, null, null, Acc_Path);
             bg_save1.execute();
         } else if(ToggleAccDataStruct == 1){
-            Background_Save bg_save1 = new Background_Save(null, Acc_data1, null, null, Acc_Path);
+            Background_Save bg_save1 = new Background_Save(null, Acc_data1, null, null, null, Acc_Path);
             bg_save1.execute();
         }
         Acc_data_array_index = 0;
 
         if(ToggleGyroDataStruct == 0) {
-            Background_Save bg_save2 = new Background_Save(null, null, Gyro_data, null, Gyro_Path);
+            Background_Save bg_save2 = new Background_Save(null, null, Gyro_data, null, null, Gyro_Path);
             bg_save2.execute();
         }else if (ToggleGyroDataStruct == 1){
-            Background_Save bg_save2 = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);
+            Background_Save bg_save2 = new Background_Save(null, null, Gyro_data1, null, null, Gyro_Path);
             bg_save2.execute();
         }
         Gyro_data_array_index = 0;
 
-        Background_Save bg_save3 = new Background_Save(Motor_data, null, null, null , Motor_Path);
+        Background_Save bg_save3 = new Background_Save(Motor_data, null, null, null , null, Motor_Path);
         bg_save3.execute();
         Motor_data_array_index = 0;
 
-        Background_Save bg_save4 = new Background_Save(null, null, null , Battery_data, Battery_Path);
+        Background_Save bg_save4 = new Background_Save(null, null, null , Battery_data, null, Battery_Path);
         bg_save4.execute();
         Battery_data_array_index = 0;
 
@@ -408,13 +407,13 @@ public class MainActivity extends Activity
                         Acc_data_array_index = 0;
 
                         if(ToggleAccDataStruct==0){
-                            Background_Save bg_AccSave = new Background_Save(null, Acc_data, null, null , Acc_Path);    // save the full struct
+                            Background_Save bg_AccSave = new Background_Save(null, Acc_data, null, null , null, Acc_Path);    // save the full struct
                             bg_AccSave.execute();
                             ToggleAccDataStruct = 1;
                             Acc_data = new sample3axes(buffer_dim_inert);
 
                         }else if(ToggleAccDataStruct==1){
-                            Background_Save bg_AccSave = new Background_Save(null, Acc_data1, null, null , Acc_Path);    // save the full struct
+                            Background_Save bg_AccSave = new Background_Save(null, Acc_data1, null, null , null, Acc_Path);    // save the full struct
                             bg_AccSave.execute();
                             ToggleAccDataStruct = 0;
                             Acc_data1 = new sample3axes(buffer_dim_inert);
@@ -449,13 +448,13 @@ public class MainActivity extends Activity
 
                         if (ToggleGyroDataStruct == 0) {
                             //Gyro_data1 = new sample3axes(buffer_dim_inert);   // re-initialise struct in which data will be saved from now
-                            Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data, null, Gyro_Path);    // save the full struct
+                            Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data, null, null, Gyro_Path);    // save the full struct
                             bg_GyroSave.execute();
                             ToggleGyroDataStruct = 1;
                             Gyro_data = new sample3axes(buffer_dim_inert);
                         } else if (ToggleGyroDataStruct == 1) {
                             //Gyro_data = new sample3axes(buffer_dim_inert);   // re-initialise struct in which data will be saved from now
-                            Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data1, null, Gyro_Path);    // save the full struct
+                            Background_Save bg_GyroSave = new Background_Save(null, null, Gyro_data1, null, null, Gyro_Path);    // save the full struct
                             bg_GyroSave.execute();
                             ToggleGyroDataStruct = 0;
                             Gyro_data1 = new sample3axes(buffer_dim_inert);
@@ -590,6 +589,22 @@ public class MainActivity extends Activity
             e.printStackTrace();
         }
 
+        // WHEELCHAIR ON/OFF
+        mFileName = user.tellAcquisitionsFolder();
+        mFileName += "/Wheelchair_"+ formatter.format(now).toString()+ ".txt";
+        lastfiles.set_wheelchair(mFileName);
+        Wheelchair_Path = mFileName;
+        SillyString = "Time\tWheelchairStatus\n";
+
+        try {
+            outputStream = new FileOutputStream(mFileName, true);
+            outputStream.write(SillyString.getBytes());
+            outputStream.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -705,8 +720,10 @@ public class MainActivity extends Activity
 
 
 
-    int OldInputData;
-    int NewInputData;
+    int Motor_OldInputData;
+    int Motor_NewInputData;
+    int Wheelchair_OldInputData;
+    int Wheelchair_NewInputData;
 
     // NEW VALUE ON PORT:
     @Override
@@ -717,19 +734,26 @@ public class MainActivity extends Activity
         view.setText(s);
 
         try {
-            OldInputData = NewInputData;
-            NewInputData = MaxiIO.get_bitState(7);      // CHECK MOTOR PIN VALUE
+            // CHECK MOTOR PIN VALUE
+            Motor_OldInputData = Motor_NewInputData;
+            Motor_NewInputData = MaxiIO.get_bitState(7);
 
-            if (NewInputData != OldInputData) {         // something occurred
+            // CHECK WHEELCHAIR ON/OFF PIN VALUE
+            Wheelchair_OldInputData = Wheelchair_NewInputData;
+            Wheelchair_NewInputData = MaxiIO.get_bitState(6);
+
+
+            // MOTOR EVENT HANDLING
+            if (Motor_NewInputData != Motor_OldInputData) {
 
                 sampleMotor tmp = new sampleMotor(1);
                 //tmp.Time[0] = System.currentTimeMillis();
                 tmp.Time[0] = SystemClock.elapsedRealtime() - Start_Time;
 
-                if (NewInputData == 1 && OldInputData == 0) {           // occurred motor event: now it is ON
+                if (Motor_NewInputData == 1 && Motor_OldInputData == 0) {           // occurred motor event: now it is ON
                     tmp.Status[0] = Motor_ON_ID;
 
-                } else if (NewInputData == 0 && OldInputData == 1) {    // occurred motor event: now it is OFF
+                } else if (Motor_NewInputData == 0 && Motor_OldInputData == 1) {    // occurred motor event: now it is OFF
                     tmp.Status[0] = Motor_OFF_ID;}
 
                 // APPEND DATA AND SAVE ON FILE
@@ -739,9 +763,39 @@ public class MainActivity extends Activity
                     Motor_data_array_index++;
 
                     if(Motor_data_array_index == Motor_data.Time.length){
-                        Background_Save bg_save = new Background_Save(Motor_data, null, null, null , Motor_Path);
+                        Background_Save bg_save = new Background_Save(Motor_data, null, null, null , null, Motor_Path);
                         bg_save.execute();
                         Motor_data_array_index = 0;
+                    }
+
+                } else {
+                    // MANAGE FULL ARRAY
+                }
+            }
+
+            // WHEELCHAIR ON/OFF EVENT HANDLING
+            if (Wheelchair_NewInputData != Wheelchair_OldInputData) {
+
+                sampleMotor tmp = new sampleMotor(1);
+                //tmp.Time[0] = System.currentTimeMillis();
+                tmp.Time[0] = SystemClock.elapsedRealtime() - Start_Time;
+
+                if (Wheelchair_NewInputData == 1 && Wheelchair_OldInputData == 0) {           // occurred motor event: now it is ON
+                    tmp.Status[0] = Motor_ON_ID;
+
+                } else if (Wheelchair_NewInputData == 0 && Wheelchair_OldInputData == 1) {    // occurred motor event: now it is OFF
+                    tmp.Status[0] = Motor_OFF_ID;}
+
+                // APPEND DATA AND SAVE ON FILE
+                if (Wheelchair_data_array_index < Wheelchair_data.Time.length) {
+                    Wheelchair_data.Time[Wheelchair_data_array_index] = tmp.Time[0];
+                    Wheelchair_data.Status[Wheelchair_data_array_index] = tmp.Status[0];
+                    Wheelchair_data_array_index++;
+
+                    if(Wheelchair_data_array_index == Wheelchair_data.Time.length){
+                        Background_Save bg_save = new Background_Save(null, null, null, null, Wheelchair_data, Wheelchair_Path);
+                        bg_save.execute();
+                        Wheelchair_data_array_index = 0;
                     }
 
                 } else {

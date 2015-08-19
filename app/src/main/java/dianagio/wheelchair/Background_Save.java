@@ -2,6 +2,7 @@ package dianagio.wheelchair;
 
 import android.os.AsyncTask;
 
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
@@ -17,6 +18,7 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
     sample3axes gyro_data =         new sample3axes(buffer_dim_inert);
     sampleMotor motor_data =        new sampleMotor(buffer_dim_batt_motor);
     sampleBattery battery_data =    new sampleBattery(buffer_dim_batt_motor);
+    sampleMotor wheelchair_data =   new sampleMotor(buffer_dim_batt_motor);
     /*
     sample3axes acc_data =          new sample3axes(2160000);
     sample3axes gyro_data =         new sample3axes(2160000);
@@ -31,13 +33,14 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
     public static final short Battery_ID    = 3;
 
     // constructor
-    public Background_Save(sampleMotor motor_in_data, sample3axes acc_in_data, sample3axes gyro_in_data, sampleBattery battery_in_data, String inFilePath) {
+    public Background_Save(sampleMotor motor_in_data, sample3axes acc_in_data, sample3axes gyro_in_data, sampleBattery battery_in_data, sampleMotor wheelchair_in_data, String inFilePath) {
 
-        motor_data =    motor_in_data;
-        acc_data =      acc_in_data;
-        gyro_data =     gyro_in_data;
-        battery_data =  battery_in_data;
-        FilePath =      inFilePath;
+        motor_data =        motor_in_data;
+        acc_data =          acc_in_data;
+        gyro_data =         gyro_in_data;
+        battery_data =      battery_in_data;
+        wheelchair_data =   wheelchair_in_data;
+        FilePath =          inFilePath;
     }
 
 
@@ -57,17 +60,32 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
         // open binary file
         try {
             BinaryOutputStream = new FileOutputStream(BinaryFilePath, true); //true: append to file
+            BufferedOutputStream out = new BufferedOutputStream(BinaryOutputStream);
 
             // fulfill string
             if (acc_data!=null) {
                 for(int i=0; i<acc_data.Time.length; i++){
                     StringToSave += acc_data.Time[i] + "\t" + acc_data.X[i] + "\t" + acc_data.Y[i] + "\t" + acc_data.Z[i] + "\n";
 
-                    BinaryOutputStream.write( (int)((acc_data.Time[i]>>32) & 0xffffffff) );     //MSB
-                    BinaryOutputStream.write( (int)(acc_data.Time[i] & 0xffffffff) );           //LSB
+                    int tmpi=0;
+                    tmpi=(int)((acc_data.Time[i]>>32) & 0xffffffff);
+                    out.write( tmpi );     //MSB
+                    tmpi = (int)(acc_data.Time[i] & 0xffffffff);
+                    out.write( tmpi );           //LSB
+                    out.write( (int) acc_data.X[i]);
+                    out.write( (int) acc_data.Y[i]);
+                    out.write( (int) acc_data.Z[i]);
+                    out.flush();
+
+                    /*int tmpi=0;
+                    tmpi=(int)((acc_data.Time[i]>>32) & 0xffffffff);
+                    BinaryOutputStream.write( tmpi );     //MSB
+                    tmpi = (int)(acc_data.Time[i] & 0xffffffff);
+                    BinaryOutputStream.write( tmpi );           //LSB
                     BinaryOutputStream.write( (int) acc_data.X[i]);
                     BinaryOutputStream.write( (int) acc_data.Y[i]);
                     BinaryOutputStream.write( (int) acc_data.Z[i]);
+                    */
                 }
 
             }else if(gyro_data!=null){
@@ -75,7 +93,7 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
                     StringToSave += gyro_data.Time[i] + "\t" + gyro_data.X[i] + "\t" + gyro_data.Y[i] + "\t" + gyro_data.Z[i] + "\n";
 
                     BinaryOutputStream.write( (int)((gyro_data.Time[i]>>32) & 0xffffffff) );
-                    BinaryOutputStream.write( (int)(gyro_data.Time[i] & 0xffffffff) );
+                    BinaryOutputStream.write( (int) (gyro_data.Time[i] & 0xffffffff) );
                     BinaryOutputStream.write( (int) gyro_data.X[i]);
                     BinaryOutputStream.write( (int) gyro_data.Y[i]);
                     BinaryOutputStream.write( (int) gyro_data.Z[i]);
@@ -99,6 +117,17 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
                     BinaryOutputStream.write( (int) battery_data.BatLev[i]);
                 }
             }
+            else if(wheelchair_data!=null){
+                for(int i=0; i<wheelchair_data.Time.length; i++){
+                    StringToSave += wheelchair_data.Time[i] + "\t" + wheelchair_data.Status[i] + "\n";
+
+                    BinaryOutputStream.write( (int)((wheelchair_data.Time[i]>>32) & 0xffffffff) );
+                    BinaryOutputStream.write( (int)(wheelchair_data.Time[i] & 0xffffffff) );
+                    BinaryOutputStream.write( (int) wheelchair_data.Status[i]);
+                }
+
+            }
+
             BinaryOutputStream.close(); //close binary file
         } catch (java.io.IOException e) {
             e.printStackTrace();
