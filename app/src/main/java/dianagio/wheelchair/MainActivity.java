@@ -540,6 +540,7 @@ public class MainActivity extends Activity
         }
         catch (Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
 
         // ACCELEROMETER
@@ -556,6 +557,7 @@ public class MainActivity extends Activity
         }
         catch (Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
         // GYROSCOPE
         mFileName = user.tellAcquisitionsFolder();
@@ -571,6 +573,7 @@ public class MainActivity extends Activity
         }
         catch (Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
 
         // BATTERY
@@ -587,6 +590,7 @@ public class MainActivity extends Activity
         }
         catch (Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
 
         // WHEELCHAIR ON/OFF
@@ -603,6 +607,7 @@ public class MainActivity extends Activity
         }
         catch (Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
 
 
@@ -656,6 +661,7 @@ public class MainActivity extends Activity
             r.run();
         } catch (YAPI_Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
 
         handler.postDelayed(r, 1000);
@@ -673,6 +679,7 @@ public class MainActivity extends Activity
         }
         catch(YAPI_Exception e){
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
     }
 
@@ -712,6 +719,7 @@ public class MainActivity extends Activity
 
                 } catch (YAPI_Exception e) {
                     e.printStackTrace();
+                    SaveErrorLog(e.toString());
                 }
             }
             handler.postDelayed(this, 1000);
@@ -804,6 +812,7 @@ public class MainActivity extends Activity
             }
         } catch (YAPI_Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
     }
     //==========================================================================
@@ -838,8 +847,17 @@ public class MainActivity extends Activity
             }
         } catch (YAPI_Exception e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
         lastfiles.isyoctoinuse = UseYocto;
+    }
+
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
     }
 
 } // fine della MainActivity

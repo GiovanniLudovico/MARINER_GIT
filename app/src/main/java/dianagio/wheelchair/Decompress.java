@@ -3,6 +3,7 @@ package dianagio.wheelchair;
 /**
  * Created by Giovanni on 28/06/2015.
  */
+import android.os.SystemClock;
 import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +50,7 @@ public class Decompress {
             zin.close();
         } catch(Exception e) {
             Log.e("Decompress", "unzip", e);
+            SaveErrorLog(e.toString());
         }
 
     }
@@ -59,5 +61,13 @@ public class Decompress {
         if(!f.isDirectory()) {
             f.mkdirs();
         }
+    }
+
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
     }
 }

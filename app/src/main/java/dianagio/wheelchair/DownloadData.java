@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -63,11 +64,13 @@ public class DownloadData extends AsyncTask<Void, Boolean, Boolean> {
         outputStream = new FileOutputStream(mfile);    //apre stream in uscita verso il file
     } catch (FileNotFoundException e) {
         e.printStackTrace();
+        SaveErrorLog(e.toString());
     }
     try {
         response=mApi.getFile(dbfolder + dbfilename, null, outputStream, null);//scarica il file dalla cartella db e copia in response i metadati
     } catch (DropboxException e) {
         e.printStackTrace();
+        SaveErrorLog(e.toString());
         return false;                                                          //se non riesce ritorna falso, che viene letto dal metodo chiamato alla chiusura del thread
     }
 
@@ -107,9 +110,17 @@ public class DownloadData extends AsyncTask<Void, Boolean, Boolean> {
             }
         }catch(Exception e){
             e.printStackTrace();
+            SaveErrorLog(e.toString());
             return false;
         }
         return status;
 
+    }
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
     }
    }

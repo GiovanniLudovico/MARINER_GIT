@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -131,6 +132,7 @@ public class Init_Activity extends Activity {
             } catch (IllegalStateException e) {
                 showToast("Couldn't authenticate with Dropbox:" + e.getLocalizedMessage());
                 // Log.i(TAG, "Error authenticating", e);
+                SaveErrorLog(e.toString());
             }
         }
     }
@@ -561,4 +563,12 @@ public class Init_Activity extends Activity {
         upload_finished=false;
     }
 
+
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
+    }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -72,6 +73,7 @@ public class UploadData extends AsyncTask<Void, Long, String> {
                 inputStream = new FileInputStream(mfile);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+                SaveErrorLog(e.toString());
             }
 
             DropboxAPI.Entry response = null;
@@ -80,6 +82,7 @@ public class UploadData extends AsyncTask<Void, Long, String> {
                         mfile.length(), null, null);
             } catch (DropboxException e) {
                 e.printStackTrace();
+                SaveErrorLog(e.toString());
             }
             if (response.bytes== mfile.length())
             {
@@ -129,10 +132,18 @@ public class UploadData extends AsyncTask<Void, Long, String> {
             }
         }catch(Exception e){
             e.printStackTrace();
+            SaveErrorLog(e.toString());
             return false;
         }
         return status;
 
+    }
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
     }
 }
 

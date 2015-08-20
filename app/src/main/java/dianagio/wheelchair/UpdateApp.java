@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -33,7 +34,16 @@ public class UpdateApp extends AsyncTask<String,Void,Boolean> {
 
         } catch (Exception e) {
             Log.e("UpdateAPP", "Update error! " + e.getMessage());
+            SaveErrorLog(e.toString());
             return false;
         }
 
-    }}
+    }
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
+    }
+}

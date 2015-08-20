@@ -2,6 +2,7 @@ package dianagio.wheelchair;
 
 import android.content.Intent;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Xml;
 import android.view.View;
@@ -128,8 +129,10 @@ public class User implements Serializable{
             osw.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         } catch (IOException e) {
             e.printStackTrace();
+            SaveErrorLog(e.toString());
         }
 
 
@@ -195,6 +198,12 @@ public class User implements Serializable{
         return "Person [name=" + name + ", surname=" + surname + "pathtouseracquisitionfolder= "+ tellAcquisitionsFolder()+"]";
     }
 
-
+    //==========================================================================
+    private void SaveErrorLog(String msg){
+        //==========================================================================
+        String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + msg +"\n";
+        LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+        BkgSave_LogHandler.execute();
+    }
 
 }

@@ -1,6 +1,7 @@
 package dianagio.wheelchair;
 
 import android.os.AsyncTask;
+import android.os.SystemClock;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -9,8 +10,10 @@ import java.io.FileOutputStream;
 /**
  * Created by DianaM on 10/07/2015.
  */
-public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
-    // buffer dimension ( amount of samples to be saved each time)
+//==========================================================================
+public class Background_Save extends AsyncTask<Void, Boolean, String> {
+    //==========================================================================
+    // buffers dimensions ( amount of samples to be saved each time)
     static final short buffer_dim_inert =       1000;
     static final short buffer_dim_batt_motor =  1;
 
@@ -33,7 +36,9 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
     public static final short Battery_ID    = 3;
 
     // constructor
+    //==========================================================================
     public Background_Save(sampleMotor motor_in_data, sample3axes acc_in_data, sample3axes gyro_in_data, sampleBattery battery_in_data, sampleMotor wheelchair_in_data, String inFilePath) {
+        //==========================================================================
 
         motor_data =        motor_in_data;
         acc_data =          acc_in_data;
@@ -50,12 +55,13 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
     }
     @Override
     //==========================================================================
-    protected Boolean doInBackground(Void... params) {
+    protected String doInBackground(Void... params) {
         //==========================================================================
         String StringToSave="";
         String BinaryFilePath = FilePath.replace( "txt", "bin"); // changes file extension by replacing part of the string
         FileOutputStream outputStream;
         FileOutputStream BinaryOutputStream;
+        String ErrorMsg="";
 
         // open binary file
         try {
@@ -131,24 +137,31 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
             BinaryOutputStream.close(); //close binary file
         } catch (java.io.IOException e) {
             e.printStackTrace();
+            ErrorMsg = e.toString();
         }
         // append string in FilePath
 
         try {
-            outputStream = new FileOutputStream(FilePath, true); //true: append to file
+            outputStream = new FileOutputStream(FilePath, true); //true: append string to file (non-binary file)
             outputStream.write(StringToSave.getBytes());
             outputStream.close();
         }
         catch (Exception e) {
             e.printStackTrace();
+            ErrorMsg += "\t" + e.toString();
         }
 
-
-     return false;
+     return ErrorMsg;
     }
 
+    // save errors in log file if present
     @Override
-    protected void onPostExecute(Boolean result) {
+    protected void onPostExecute(String result) {
+        if (result != "") {
+            String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + result +"\n";
+            LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
+            BkgSave_LogHandler.execute();
+        }
 
         return;
     }
