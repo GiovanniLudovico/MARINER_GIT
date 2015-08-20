@@ -292,6 +292,8 @@ public class MainActivity extends Activity
         tsample_view.setText("Tsample= " + tsample + " ms");
         */
 
+        SaveErrorLog("switch to init activity");
+
         // STOP ACQUISITIONS
         if (UseYocto == true) {
             Stop_Yocto();

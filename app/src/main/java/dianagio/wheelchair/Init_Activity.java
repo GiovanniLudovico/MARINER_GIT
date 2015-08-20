@@ -278,6 +278,9 @@ public class Init_Activity extends Activity {
         public void onReceive(Context c, Intent i) {
             //==========================================================================
             showToast("batteryON");
+
+            SaveErrorLog("switch to main activity");
+
             start_other(null);
 
 
