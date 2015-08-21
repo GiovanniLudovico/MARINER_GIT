@@ -127,6 +127,7 @@ public class MainActivity extends Activity
         //==========================================================================
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MaxiIO_view = (TextView) findViewById(R.id.MaxiIO_view);
 
         Intent intent = getIntent();
         user = (User) intent.getSerializableExtra("user");      // GET INPUT FROM INIT ACTIVITY

@@ -33,14 +33,17 @@ public class UploadData extends AsyncTask<Void, Long, String> {
     DropboxAPI<?> mApi;
     public AsyncResponse delegate = null;//Call back interface
 
-    public void UploadData_parameters(Context context,DropboxAPI<?> Api,String path,String folder,String filename) {
+    public int BatLev = 0;
+    private static final int BATTERY_LOW_THRESHOLD = 30;
+
+    public void UploadData_parameters(Context context,DropboxAPI<?> Api,String path,String folder,String filename, int in_bat_lev) {
 
         mstring=(path);
         mcontext=context;
         mApi=Api;
         dbfolder= folder;
         dbfilename=filename;
-
+        BatLev = in_bat_lev;
 
 
     }
@@ -120,23 +123,26 @@ public class UploadData extends AsyncTask<Void, Long, String> {
     }
     public boolean isNetworkOnline() {
         boolean status=false;
-        try{
-            ConnectivityManager cm = (ConnectivityManager) mcontext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = cm.getNetworkInfo(0);
-            if (netInfo != null && netInfo.getState()==NetworkInfo.State.CONNECTED) {
-                status= true;
-            }else {
-                netInfo = cm.getNetworkInfo(1);
-                if(netInfo!=null && netInfo.getState()== NetworkInfo.State.CONNECTED)
-                    status= true;
+        if(BatLev >= BATTERY_LOW_THRESHOLD) {
+            try {
+                ConnectivityManager cm = (ConnectivityManager) mcontext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo netInfo = cm.getNetworkInfo(0);
+                if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
+                    status = true;
+                } else {
+                    netInfo = cm.getNetworkInfo(1);
+                    if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED)
+                        status = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                SaveErrorLog(e.toString());
+                return false;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-            SaveErrorLog(e.toString());
-            return false;
+            return status;
         }
-        return status;
-
+        else
+            return false;
     }
     //==========================================================================
     private void SaveErrorLog(String msg){

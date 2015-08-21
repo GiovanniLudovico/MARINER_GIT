@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -67,6 +69,7 @@ public class Init_Activity extends Activity {
     public List<String> NotSentFilesName = new ArrayList<>(); //not sent files memory
 
      LastFiles lastfiles;                                     //handle of the last files to upload
+    int BatLevel = 0;
 
     @Override
     //==========================================================================
@@ -75,6 +78,7 @@ public class Init_Activity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init_);                 //loads layout
         registerReceiver(mBatChargeOn, new IntentFilter(Intent.ACTION_POWER_CONNECTED));
+        registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         // We create a new AuthSession so that we can use the Dropbox API.
         AndroidAuthSession session = buildSession();
         mDBApi = new DropboxAPI<AndroidAuthSession>(session);
@@ -137,6 +141,8 @@ public class Init_Activity extends Activity {
         }
     }
 
+
+
     //==========TRIES TO UPLOAD THE LAST FILES ACQUIRED============
     private void upload_lastFiles()
     //==========================================================================
@@ -173,7 +179,7 @@ public class Init_Activity extends Activity {
                 }
             });
 
-            upload.UploadData_parameters(this, mDBApi, lastfiles.tell_motor(), user_child.tellUserFolder(), user_child.Acquisitions +filenameMotor);
+            upload.UploadData_parameters(this, mDBApi, lastfiles.tell_motor(), user_child.tellUserFolder(), user_child.Acquisitions +filenameMotor, BatLevel);
             upload.execute();
         }
         s1 = lastfiles.tell_accelerometer();
@@ -196,7 +202,7 @@ public class Init_Activity extends Activity {
                 else showToast("tutto ok");
             }
         });
-        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_accelerometer(), user_child.tellUserFolder(), user_child.Acquisitions + filenameAcc);
+        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_accelerometer(), user_child.tellUserFolder(), user_child.Acquisitions + filenameAcc, BatLevel);
         upload.execute();
         s1 = lastfiles.tell_gyroscope();
         s2 = user_child.tellAcquisitionsFolder();
@@ -218,7 +224,7 @@ public class Init_Activity extends Activity {
                 else showToast("tutto ok");
             }
         });
-        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_gyroscope(), user_child.tellUserFolder(), user_child.Acquisitions +filenameGyro);
+        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_gyroscope(), user_child.tellUserFolder(), user_child.Acquisitions +filenameGyro, BatLevel);
         upload.execute();
 
 
@@ -242,7 +248,7 @@ public class Init_Activity extends Activity {
                 else showToast("tutto ok");
             }
         });
-        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_gyroscope(), user_child.tellUserFolder(), user_child.Acquisitions +filenameBattery);
+        upload.UploadData_parameters(this, mDBApi, lastfiles.tell_gyroscope(), user_child.tellUserFolder(), user_child.Acquisitions +filenameBattery, BatLevel);
         upload.execute();
 
 
@@ -272,6 +278,15 @@ public class Init_Activity extends Activity {
     //==============================================================================================
 
     //==========================================================================
+    private BroadcastReceiver mBatChanged = new BroadcastReceiver() {
+        //==========================================================================
+        @Override
+        public void onReceive(Context cont, Intent battery_intent) {
+            // GET BATTERY LEVEL
+            BatLevel = battery_intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        }
+    };
+    //==========================================================================
     private BroadcastReceiver mBatChargeOn = new BroadcastReceiver() {
         @Override
         //When Event is published, onReceive method is called
@@ -282,10 +297,9 @@ public class Init_Activity extends Activity {
             SaveErrorLog("switch to main activity");
 
             start_other(null);
-
-
         }
     };
+
      //PLOT TOAST
     private void showToast(String msg) {
         Toast error = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
@@ -295,7 +309,7 @@ public class Init_Activity extends Activity {
     private void store_user(String n,String s){
         //==========================================================================
         user_child=new User(n,s,null);
-        XML_handler handler=new XML_handler();
+        XML_handler handler = new XML_handler();
         handler.write(user_child);
 
 
@@ -411,7 +425,7 @@ public class Init_Activity extends Activity {
                     else showToast("tutto ok");
                 }
             });
-            upload.UploadData_parameters(this, mDBApi, path, user_child.tellUserFolder(), user_child.Metadata);
+            upload.UploadData_parameters(this, mDBApi, path, user_child.tellUserFolder(), user_child.Metadata, BatLevel);
             upload.execute();
         } else {
             //====RETRIEVES CHILD DATA========
@@ -547,7 +561,7 @@ public class Init_Activity extends Activity {
                     }
                 }
             });//??????perche devo farlo ogni volta?
-            upload.UploadData_parameters(this, mDBApi, list_of_files.get(numOfFilesRemaining - 1), user_child.tellUserFolder()+"/Acquisitions", list_of_files.get(numOfFilesRemaining));
+            upload.UploadData_parameters(this, mDBApi, list_of_files.get(numOfFilesRemaining - 1), user_child.tellUserFolder()+"/Acquisitions", list_of_files.get(numOfFilesRemaining), BatLevel);
             upload.execute();
             numOfFilesRemaining = numOfFilesRemaining - 2;//sottrae due, perchè uno è il path del file e uno e il relativo path su db
             if (numOfFilesRemaining == -1)//se èarrivata a -1 vuol dire che può resettare la lista. li ha caricati tutti
