@@ -16,8 +16,9 @@ import static com.yoctopuce.YoctoAPI.YDigitalIO.FindDigitalIO;
 /**
  * Created by DianaM on 20/08/2015.
  */
+//==========================================================================
 public class Yoctopuce implements YDigitalIO.UpdateCallback{
-
+    //==========================================================================
     String MaxiIO_SerialN;
     YDigitalIO MaxiIO;
     YModule tmp;
@@ -39,6 +40,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
     int Motor_NewInputData;
     int Wheelchair_OldInputData;
     int Wheelchair_NewInputData;
+    private int _outputdata;
 
     TextView view;
     TextView MaxiIO_info;
@@ -49,7 +51,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
     //==========================================================================
     public Yoctopuce(Context IN_AppContext, long in_start_time, String in_wheelc_path, String in_motor_path, TextView in_yocto_view){
         //==========================================================================
-        // IN_AppContext = getApplicationContext();
+        // IN_AppContext = getApplicationContext() da ricavare così.
         AppContext = IN_AppContext;
         Start_Time = in_start_time;
 
@@ -66,7 +68,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
 
         // Connect to Yoctopuce Maxi-IO
         try {
-            YAPI.EnableUSBHost(AppContext);
+            YAPI.EnableUSBHost(this);
             YAPI.RegisterHub("usb");
 
             tmp = YModule.FirstModule();
@@ -77,33 +79,38 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                     MaxiIO = FindDigitalIO(MaxiIO_SerialN);
                     if(MaxiIO.isOnline()) {
                         //call_toast("Maxi-IO connected");
-                        MaxiIO.registerValueCallback((YDigitalIO.UpdateCallback) this);
+                        MaxiIO.registerValueCallback(this);
                         YAPI.HandleEvents();
+                        MaxiIO_info.setText("MaxiIO: OK");
                     }
                 }
                 else {
                     //call_toast("MAXI-IO NOT CONNECTED");
+                    MaxiIO_info.setText("MaxiIO: NO");
                 }
                 tmp = tmp.nextModule();
             }
-            r.run();
+
         } catch (YAPI_Exception e) {
             e.printStackTrace();
             SaveErrorLog(e.toString());
         }
-
+        r.run();
         handler.postDelayed(r, 1000);
     }
 
+
     //==========================================================================
-    protected void Init_Yocto(YDigitalIO moduleName){
+    protected void Init_Yocto(){
         //==========================================================================
         // set the port as input
         try {
-            moduleName.set_portDirection(0x0F);             //bit 0-3: OUT; bit 4-7: IN
-            moduleName.set_portPolarity(0);                 // polarity set to regular
-            moduleName.set_portOpenDrain(0);                // No open drain
-            moduleName.set_portState(0x00);                 // imposta valori logici di uscita inizialmente tutti bassi
+            MaxiIO.set_portDirection(0x0F);             //bit 0-3: OUT; bit 4-7: IN
+            MaxiIO.set_portPolarity(0);                 // polarity set to regular
+            MaxiIO.set_portOpenDrain(0);                // No open drain
+            //MaxiIO.set_portState(0x00);                 // imposta valori logici di uscita inizialmente tutti bassi
+            _outputdata = (_outputdata + 1) % 16;   // cycle ouput 0..15
+            MaxiIO.set_portState(_outputdata);          // set output value
         }
         catch(YAPI_Exception e){
             e.printStackTrace();
@@ -124,9 +131,10 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
     //==============================================================================================
     //==============================================================================================
     private Handler handler = new Handler();
-    private int _outputdata;
+
     final Runnable r = new Runnable()
     {
+        @Override
         public void run()
         {
             if (MaxiIO_SerialN != null) {
@@ -150,7 +158,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                     SaveErrorLog(e.toString());
                 }
             }
-            handler.postDelayed(this, 1000);
+            handler.postDelayed(this,1000);
         }
     };
 
@@ -260,9 +268,6 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                         MaxiIO_info.setText("MaxiIO connected: NO");
                     }
                 }
-                else {
-                    UseYocto = false;
-                }
                 tmp = tmp.nextModule();
             }
         } catch (YAPI_Exception e) {
@@ -281,5 +286,4 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
         LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
         BkgSave_LogHandler.execute();
     }
-
 }

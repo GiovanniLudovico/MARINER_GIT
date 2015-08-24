@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
  * Created by DianaM on 10/07/2015.
  */
 //==========================================================================
-public class Background_Save extends AsyncTask<Void, Boolean, String> {
+public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
     //==========================================================================
     // buffers dimensions ( amount of samples to be saved each time)
     static final short buffer_dim_inert =       1000;
@@ -55,13 +55,12 @@ public class Background_Save extends AsyncTask<Void, Boolean, String> {
     }
     @Override
     //==========================================================================
-    protected String doInBackground(Void... params) {
+    protected Boolean doInBackground(Void... params) {
         //==========================================================================
         String StringToSave="";
         String BinaryFilePath = FilePath.replace( "txt", "bin"); // changes file extension by replacing part of the string
         FileOutputStream outputStream;
         FileOutputStream BinaryOutputStream;
-        String ErrorMsg="";
 
         // open binary file
         try {
@@ -137,7 +136,6 @@ public class Background_Save extends AsyncTask<Void, Boolean, String> {
             BinaryOutputStream.close(); //close binary file
         } catch (java.io.IOException e) {
             e.printStackTrace();
-            ErrorMsg = e.toString();
         }
         // append string in FilePath
 
@@ -148,22 +146,10 @@ public class Background_Save extends AsyncTask<Void, Boolean, String> {
         }
         catch (Exception e) {
             e.printStackTrace();
-            ErrorMsg += "\t" + e.toString();
         }
 
-     return ErrorMsg;
+     return true;
     }
 
-    // save errors in log file if present
-    @Override
-    protected void onPostExecute(String result) {
-        if (result != "") {
-            String StringToSend = "" + SystemClock.elapsedRealtime() + "\t" + result +"\n";
-            LogFile_Handler BkgSave_LogHandler = new LogFile_Handler(StringToSend);
-            BkgSave_LogHandler.execute();
-        }
-
-        return;
-    }
 
 }

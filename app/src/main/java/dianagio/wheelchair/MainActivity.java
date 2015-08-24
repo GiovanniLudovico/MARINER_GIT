@@ -33,7 +33,7 @@ import static com.yoctopuce.YoctoAPI.YDigitalIO.FindDigitalIO;
 
 //==========================================================================
 public class MainActivity extends Activity
-        implements SensorEventListener, YDigitalIO.UpdateCallback {
+        implements SensorEventListener{//, YDigitalIO.UpdateCallback {
 //==========================================================================
 
     SensorManager mSensorManager;
@@ -120,6 +120,8 @@ public class MainActivity extends Activity
     long tsample = 0;
     long tsave = 0;
 
+    Yoctopuce MyYoctoManager;
+
 
     @Override
     //==========================================================================
@@ -148,6 +150,7 @@ public class MainActivity extends Activity
         registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         lastfiles.isyoctoinuse = UseYocto;
+
     }
 
 
@@ -268,6 +271,8 @@ public class MainActivity extends Activity
         CreateMyFile();
 
         // CHECK IF YOCTOPUCE IS CONNECTED AND START SAMPLING
+        MyYoctoManager = new Yoctopuce(getApplicationContext(), Start_Time, Wheelchair_Path, Motor_Path, MaxiIO_view);
+        /* vecchio
         IsYoctoConnected();
         Acc_OnResume();
         Gyro_OnResume();
@@ -276,8 +281,19 @@ public class MainActivity extends Activity
             Start_Yocto();
         } else
             call_toast("you are not using Yoctopuce");
-
         call_toast("Wheelchair ON");
+*/
+        MyYoctoManager.IsYoctoConnected();
+        UseYocto = MyYoctoManager.tell_use_yocto();
+        Acc_OnResume();
+        Gyro_OnResume();
+        registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (UseYocto == true) {
+            MyYoctoManager.Start_Yocto();
+            MaxiIO_view.setText("useYocto=true");
+        }
+        else
+            MaxiIO_view.setText("useYocto=false");
 
         // DEBUG
         //tsample = System.currentTimeMillis();
@@ -297,7 +313,7 @@ public class MainActivity extends Activity
 
         // STOP ACQUISITIONS
         if (UseYocto == true) {
-            Stop_Yocto();
+            MyYoctoManager.Stop_Yocto();
         }
         Acc_OnPause();
         Gyro_OnPause();
@@ -348,14 +364,15 @@ public class MainActivity extends Activity
         //==========================================================================
         // salva su buffer info motore ON + timestamp
 
-        call_toast("Motor ON");
+       /* VECCHIO
+       call_toast("Motor ON");
 
         //AppendNewData(Motor_ID, null, 1);
         if (UseYocto == true) {
             Init_Yocto(MaxiIO);
         } else
             call_toast("you are not using Yoctopuce");
-
+*/
     }
 
     //==========================================================================
@@ -369,7 +386,7 @@ public class MainActivity extends Activity
     }
 
 
-    // DA TOGLIERE, SOLO PER DEBUG DEL SALVATAGGIO DEI DATI
+    // DA TOGLIERE, SERVONO SOLO PER DEBUG DEL SALVATAGGIO DEI DATI
     int ramp_acc=0;
     int ramp_gyro=0;
 
@@ -632,6 +649,8 @@ public class MainActivity extends Activity
     // YOCTOPUCE - MAXI-IO CONTROL
     //==============================================================================================
     //==============================================================================================
+
+    /*
     String MaxiIO_SerialN;
     YDigitalIO MaxiIO;
     YModule tmp;
@@ -691,13 +710,14 @@ public class MainActivity extends Activity
         //==========================================================================
     YAPI.FreeAPI();
     }
-
+*/
 
     //==============================================================================================
     //==============================================================================================
     //  YOCTOPUCE: EVENTS HANDLING
     //==============================================================================================
     //==============================================================================================
+    /*
     private Handler handler = new Handler();
     private int _outputdata;
     final Runnable r = new Runnable()
@@ -854,6 +874,7 @@ public class MainActivity extends Activity
         }
         lastfiles.isyoctoinuse = UseYocto;
     }
+    */
 
     //==========================================================================
     private void SaveErrorLog(String msg){
