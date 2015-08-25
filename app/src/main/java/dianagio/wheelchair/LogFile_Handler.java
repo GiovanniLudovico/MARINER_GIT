@@ -44,7 +44,7 @@ public class LogFile_Handler extends AsyncTask<Void, Boolean, Boolean> {
         FileOutputStream outputStream;
 
         // create folder if it doesn't exist
-        File LogFilesFolder = new File(getExternalStorageDirectory().getAbsolutePath() + "/Wheelchair" + "/LogFiles");
+        File LogFilesFolder = new File(getExternalStorageDirectory().getAbsolutePath() + "/Wheelchair" + "/LogFiles/");
         if (!LogFilesFolder.exists()) {
             LogFilesFolder.mkdir();
         }

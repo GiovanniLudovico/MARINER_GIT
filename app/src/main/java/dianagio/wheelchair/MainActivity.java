@@ -33,7 +33,7 @@ import static com.yoctopuce.YoctoAPI.YDigitalIO.FindDigitalIO;
 
 //==========================================================================
 public class MainActivity extends Activity
-        implements SensorEventListener{//, YDigitalIO.UpdateCallback {
+        implements SensorEventListener, YDigitalIO.UpdateCallback {
 //==========================================================================
 
     SensorManager mSensorManager;
@@ -271,32 +271,43 @@ public class MainActivity extends Activity
         CreateMyFile();
 
         // CHECK IF YOCTOPUCE IS CONNECTED AND START SAMPLING
-        MyYoctoManager = new Yoctopuce(getApplicationContext(), Start_Time, Wheelchair_Path, Motor_Path, MaxiIO_view);
-        /* vecchio
-        IsYoctoConnected();
-        Acc_OnResume();
-        Gyro_OnResume();
-        registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        if (UseYocto == true) {
-            Start_Yocto();
-        } else
-            call_toast("you are not using Yoctopuce");
-        call_toast("Wheelchair ON");
-*/
+        // WITH YOCTOPUCE CLASS
+        /*MyYoctoManager = new Yoctopuce(getApplicationContext(), Start_Time, Wheelchair_Path, Motor_Path, MaxiIO_view);
         MyYoctoManager.IsYoctoConnected();
-        UseYocto = MyYoctoManager.tell_use_yocto();
+        UseYocto = MyYoctoManager.tell_use_yocto();*/
+        //WITHOUT YOCTOPUCE CLASS
+        IsYoctoConnected();
+
         Acc_OnResume();
         Gyro_OnResume();
         registerReceiver(mBatChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
         if (UseYocto == true) {
-            MyYoctoManager.Start_Yocto();
+            //MyYoctoManager.Start_Yocto();
+            Start_Yocto();
             MaxiIO_view.setText("useYocto=true");
         }
         else
             MaxiIO_view.setText("useYocto=false");
 
-        // DEBUG
-        //tsample = System.currentTimeMillis();
+        // salvo l'evento carrozzina accesa
+        sampleMotor tmp = new sampleMotor(1);
+        tmp.Time[0] = SystemClock.elapsedRealtime() - Start_Time;
+        tmp.Status[0] = Motor_ON_ID;
+
+        // APPEND DATA AND SAVE ON FILE
+        if (Wheelchair_data_array_index < Wheelchair_data.Time.length) {
+            Wheelchair_data.Time[Wheelchair_data_array_index] = tmp.Time[0];
+            Wheelchair_data.Status[Wheelchair_data_array_index] = tmp.Status[0];
+            Wheelchair_data_array_index++;
+
+            if (Wheelchair_data_array_index == Wheelchair_data.Time.length) {
+                Background_Save bg_save = new Background_Save(null, null, null, null, Wheelchair_data, Wheelchair_Path);
+                bg_save.execute();
+                Wheelchair_data_array_index = 0;
+            }
+        }
+
     }
 
     //==========================================================================
@@ -309,11 +320,12 @@ public class MainActivity extends Activity
         tsample_view.setText("Tsample= " + tsample + " ms");
         */
 
-        SaveErrorLog("switch to init activity");
+        SaveErrorLog("switch to init activity_main");
 
         // STOP ACQUISITIONS
         if (UseYocto == true) {
-            MyYoctoManager.Stop_Yocto();
+            //MyYoctoManager.Stop_Yocto();
+            Stop_Yocto();
         }
         Acc_OnPause();
         Gyro_OnPause();
@@ -442,8 +454,6 @@ public class MainActivity extends Activity
                 } else {
                     // MANAGES FULL ARRAY
                 }
-
-
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
@@ -480,17 +490,12 @@ public class MainActivity extends Activity
                             Gyro_data1 = new sample3axes(buffer_dim_inert);
                         }
                     }
-
                 }
                 else {
                     // MANAGES FULL ARRAY
                 }
-
-
                 break;
         }
-
-
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -543,7 +548,7 @@ public class MainActivity extends Activity
         Date now = new Date();
 
         //Start_Time = System.nanoTime();
-        Start_Time = SystemClock.elapsedRealtime();
+        Start_Time = SystemClock.elapsedRealtime(); // real time elapsed since boot in milli seconds
 
         mFileName = user.tellAcquisitionsFolder();
 
@@ -650,7 +655,7 @@ public class MainActivity extends Activity
     //==============================================================================================
     //==============================================================================================
 
-    /*
+
     String MaxiIO_SerialN;
     YDigitalIO MaxiIO;
     YModule tmp;
@@ -683,7 +688,7 @@ public class MainActivity extends Activity
             r.run();
         } catch (YAPI_Exception e) {
             e.printStackTrace();
-            SaveErrorLog(e.toString());
+            SaveErrorLog("start_main\t" + e.toString());
         }
 
         handler.postDelayed(r, 1000);
@@ -710,14 +715,14 @@ public class MainActivity extends Activity
         //==========================================================================
     YAPI.FreeAPI();
     }
-*/
+
 
     //==============================================================================================
     //==============================================================================================
     //  YOCTOPUCE: EVENTS HANDLING
     //==============================================================================================
     //==============================================================================================
-    /*
+
     private Handler handler = new Handler();
     private int _outputdata;
     final Runnable r = new Runnable()
@@ -742,7 +747,8 @@ public class MainActivity extends Activity
 
                 } catch (YAPI_Exception e) {
                     e.printStackTrace();
-                    SaveErrorLog(e.toString());
+                    //SaveErrorLog("run_Y\t" + e.toString());
+                    // tolto questo salvataggio perchè genera errori ma il runnable fa quello che deve fare
                 }
             }
             handler.postDelayed(this, 1000);
@@ -755,6 +761,8 @@ public class MainActivity extends Activity
     int Motor_NewInputData;
     int Wheelchair_OldInputData;
     int Wheelchair_NewInputData;
+    public static final short MaxiIO_MotorPin = 7;
+    public static final short MaxiIO_WheelcPin = 6;
 
     // NEW VALUE ON PORT:
     @Override
@@ -767,11 +775,11 @@ public class MainActivity extends Activity
         try {
             // CHECK MOTOR PIN VALUE
             Motor_OldInputData = Motor_NewInputData;
-            Motor_NewInputData = MaxiIO.get_bitState(7);
+            Motor_NewInputData = MaxiIO.get_bitState(MaxiIO_MotorPin);
 
             // CHECK WHEELCHAIR ON/OFF PIN VALUE
             Wheelchair_OldInputData = Wheelchair_NewInputData;
-            Wheelchair_NewInputData = MaxiIO.get_bitState(6);
+            Wheelchair_NewInputData = MaxiIO.get_bitState(MaxiIO_WheelcPin);
 
 
             // MOTOR EVENT HANDLING
@@ -828,14 +836,13 @@ public class MainActivity extends Activity
                         bg_save.execute();
                         Wheelchair_data_array_index = 0;
                     }
-
                 } else {
                     // MANAGE FULL ARRAY
                 }
             }
         } catch (YAPI_Exception e) {
             e.printStackTrace();
-            SaveErrorLog(e.toString());
+            SaveErrorLog("yNewValue_main\t" + e.toString());
         }
     }
     //==========================================================================
@@ -870,11 +877,11 @@ public class MainActivity extends Activity
             }
         } catch (YAPI_Exception e) {
             e.printStackTrace();
-            SaveErrorLog(e.toString());
+            SaveErrorLog("isYoctoConnected_main\t" + e.toString());
         }
         lastfiles.isyoctoinuse = UseYocto;
     }
-    */
+
 
     //==========================================================================
     private void SaveErrorLog(String msg){

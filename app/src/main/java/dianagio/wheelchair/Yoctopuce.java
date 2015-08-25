@@ -23,7 +23,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
     YDigitalIO MaxiIO;
     YModule tmp;
     Context AppContext;
-    long Start_Time = 0;
+    long Start_Time;
     public static final short Motor_OFF_ID = 0;
     public static final short Motor_ON_ID = 1;
 
@@ -78,14 +78,12 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                     MaxiIO_SerialN = tmp.get_serialNumber();
                     MaxiIO = FindDigitalIO(MaxiIO_SerialN);
                     if(MaxiIO.isOnline()) {
-                        //call_toast("Maxi-IO connected");
                         MaxiIO.registerValueCallback(this);
                         YAPI.HandleEvents();
                         MaxiIO_info.setText("MaxiIO: OK");
                     }
                 }
                 else {
-                    //call_toast("MAXI-IO NOT CONNECTED");
                     MaxiIO_info.setText("MaxiIO: NO");
                 }
                 tmp = tmp.nextModule();
@@ -93,7 +91,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
 
         } catch (YAPI_Exception e) {
             e.printStackTrace();
-            SaveErrorLog(e.toString());
+            SaveErrorLog("start\t" + e.toString());
         }
         r.run();
         handler.postDelayed(r, 1000);
@@ -138,8 +136,11 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
         public void run()
         {
             if (MaxiIO_SerialN != null) {
+
                 YDigitalIO io = YDigitalIO.FindDigitalIO(MaxiIO_SerialN);
                 try {
+                   /* YAPI.EnableUSBHost(AppContext);
+                    YAPI.RegisterHub("usb");*/
                     YAPI.HandleEvents();
 
                     // DO THIS EVERYTIME TO LET IT WORK PROPERLY
@@ -147,6 +148,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                     io.set_portPolarity(0);                 // polarity set to regular
                     io.set_portOpenDrain(0);                // No open drain
 
+                    // da togliere per funzionamento finale, serve solo per debug
                     _outputdata = (_outputdata + 1) % 16;   // cycle ouput 0..15
                     io.set_portState(_outputdata);          // set output value
 
@@ -155,7 +157,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
 
                 } catch (YAPI_Exception e) {
                     e.printStackTrace();
-                    SaveErrorLog(e.toString());
+                    SaveErrorLog("run\t" + e.toString());
                 }
             }
             handler.postDelayed(this,1000);
@@ -177,22 +179,22 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
             Motor_NewInputData = MaxiIO.get_bitState(7);
 
             // CHECK WHEELCHAIR ON/OFF PIN VALUE
-            Wheelchair_OldInputData = Wheelchair_NewInputData;
+            /*Wheelchair_OldInputData = Wheelchair_NewInputData;
             Wheelchair_NewInputData = MaxiIO.get_bitState(6);
-
+*/
 
             // MOTOR EVENT HANDLING
             if (Motor_NewInputData != Motor_OldInputData) {
 
                 sampleMotor tmp = new sampleMotor(1);
-                //tmp.Time[0] = System.currentTimeMillis();
                 tmp.Time[0] = SystemClock.elapsedRealtime() - Start_Time;
 
                 if (Motor_NewInputData == 1 && Motor_OldInputData == 0) {           // occurred motor event: now it is ON
                     tmp.Status[0] = Motor_ON_ID;
 
                 } else if (Motor_NewInputData == 0 && Motor_OldInputData == 1) {    // occurred motor event: now it is OFF
-                    tmp.Status[0] = Motor_OFF_ID;}
+                    tmp.Status[0] = Motor_OFF_ID;
+                }
 
                 // APPEND DATA AND SAVE ON FILE
                 if (Motor_data_array_index < Motor_data.Time.length) {
@@ -211,6 +213,7 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                 }
             }
 
+            /*
             // WHEELCHAIR ON/OFF EVENT HANDLING
             if (Wheelchair_NewInputData != Wheelchair_OldInputData) {
 
@@ -218,12 +221,12 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                 //tmp.Time[0] = System.currentTimeMillis();
                 tmp.Time[0] = SystemClock.elapsedRealtime() - Start_Time;
 
-                if (Wheelchair_NewInputData == 1 && Wheelchair_OldInputData == 0) {           // occurred motor event: now it is ON
+                if (Wheelchair_NewInputData == 1 && Wheelchair_OldInputData == 0) {           // occurred wheelchair event: now it is ON
                     tmp.Status[0] = Motor_ON_ID;
 
-                } else if (Wheelchair_NewInputData == 0 && Wheelchair_OldInputData == 1) {    // occurred motor event: now it is OFF
-                    tmp.Status[0] = Motor_OFF_ID;}
-
+                } else if (Wheelchair_NewInputData == 0 && Wheelchair_OldInputData == 1) {    // occurred wheelchair event: now it is OFF
+                    tmp.Status[0] = Motor_OFF_ID;
+                }
                 // APPEND DATA AND SAVE ON FILE
                 if (Wheelchair_data_array_index < Wheelchair_data.Time.length) {
                     Wheelchair_data.Time[Wheelchair_data_array_index] = tmp.Time[0];
@@ -240,9 +243,10 @@ public class Yoctopuce implements YDigitalIO.UpdateCallback{
                     // MANAGE FULL ARRAY
                 }
             }
+            */
         } catch (YAPI_Exception e) {
             e.printStackTrace();
-            SaveErrorLog(e.toString());
+            SaveErrorLog("yNewVaue\t" + e.toString());
         }
     }
     //==========================================================================

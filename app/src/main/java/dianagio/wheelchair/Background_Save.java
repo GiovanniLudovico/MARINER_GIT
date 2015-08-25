@@ -82,15 +82,6 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
                     out.write( (int) acc_data.Z[i]);
                     out.flush();
 
-                    /*int tmpi=0;
-                    tmpi=(int)((acc_data.Time[i]>>32) & 0xffffffff);
-                    BinaryOutputStream.write( tmpi );     //MSB
-                    tmpi = (int)(acc_data.Time[i] & 0xffffffff);
-                    BinaryOutputStream.write( tmpi );           //LSB
-                    BinaryOutputStream.write( (int) acc_data.X[i]);
-                    BinaryOutputStream.write( (int) acc_data.Y[i]);
-                    BinaryOutputStream.write( (int) acc_data.Z[i]);
-                    */
                 }
 
             }else if(gyro_data!=null){
@@ -108,9 +99,13 @@ public class Background_Save extends AsyncTask<Void, Boolean, Boolean> {
                 for(int i=0; i<motor_data.Time.length; i++){
                     StringToSave += motor_data.Time[i] + "\t" + motor_data.Status[i] + "\n";
 
-                    BinaryOutputStream.write( (int)((motor_data.Time[i]>>32) & 0xffffffff) );
+                    /*BinaryOutputStream.write( (int)((motor_data.Time[i]>>32) & 0xffffffff) );
                     BinaryOutputStream.write( (int)(motor_data.Time[i] & 0xffffffff) );
                     BinaryOutputStream.write( (int) motor_data.Status[i]);
+                    */
+                    out.write( (int)((motor_data.Time[i]>>32) & 0xffffffff) );
+                    out.write( (int)(motor_data.Time[i] & 0xffffffff) );
+                    out.write( (int) motor_data.Status[i]);
                 }
 
             }else if(battery_data!=null){
